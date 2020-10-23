@@ -52,7 +52,7 @@
 pcl::modeler::RenderWindow::RenderWindow(RenderWindowItem* render_window_item,
                                          QWidget* parent,
                                          Qt::WindowFlags flags)
-: QVTKWidget(parent, flags)
+: PCLQVTKWidget(parent, flags)
 , axes_(vtkSmartPointer<vtkCubeAxesActor>::New())
 , render_window_item_(render_window_item)
 {
@@ -76,7 +76,11 @@ pcl::modeler::RenderWindow::~RenderWindow()
 void
 pcl::modeler::RenderWindow::initRenderer()
 {
+#if VTK_MAJOR_VERSION > 8
+  vtkSmartPointer<vtkRenderWindow> win = renderWindow();
+#else
   vtkSmartPointer<vtkRenderWindow> win = GetRenderWindow();
+#endif
   vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
   win->AddRenderer(renderer);
 
@@ -105,7 +109,7 @@ pcl::modeler::RenderWindow::focusInEvent(QFocusEvent* event)
   dynamic_cast<SceneTree*>(render_window_item_->treeWidget())
       ->selectRenderWindowItem(render_window_item_);
 
-  QVTKWidget::focusInEvent(event);
+  PCLQVTKWidget::focusInEvent(event);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +134,11 @@ pcl::modeler::RenderWindow::setTitle(const QString& title)
 void
 pcl::modeler::RenderWindow::render()
 {
+#if VTK_MAJOR_VERSION > 8
+  renderWindow()->Render();
+#else
   GetRenderWindow()->Render();
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,9 +146,14 @@ void
 pcl::modeler::RenderWindow::resetCamera()
 {
   double bounds[6];
+#if VTK_MAJOR_VERSION > 8
+  renderWindow()->GetRenderers()->GetFirstRenderer()->ComputeVisiblePropBounds(bounds);
+  renderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera(bounds);
+#else
   GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ComputeVisiblePropBounds(
       bounds);
   GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera(bounds);
+#endif
   render();
 }
 
@@ -148,14 +161,22 @@ pcl::modeler::RenderWindow::resetCamera()
 void
 pcl::modeler::RenderWindow::getBackground(double& r, double& g, double& b)
 {
+#if VTK_MAJOR_VERSION > 8
+  renderWindow()->GetRenderers()->GetFirstRenderer()->GetBackground(r, g, b);
+#else
   GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetBackground(r, g, b);
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl::modeler::RenderWindow::setBackground(double r, double g, double b)
 {
+#if VTK_MAJOR_VERSION > 8
+  renderWindow()->GetRenderers()->GetFirstRenderer()->SetBackground(r, g, b);
+#else
   GetRenderWindow()->GetRenderers()->GetFirstRenderer()->SetBackground(r, g, b);
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,8 +185,13 @@ pcl::modeler::RenderWindow::updateAxes()
 {
   vtkBoundingBox bb;
 
+#if VTK_MAJOR_VERSION > 8
+  vtkActorCollection* actors =
+      renderWindow()->GetRenderers()->GetFirstRenderer()->GetActors();
+#else
   vtkActorCollection* actors =
       GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActors();
+#endif
 
   actors->InitTraversal();
   for (int i = 0, i_end = actors->GetNumberOfItems(); i < i_end; ++i) {
@@ -181,16 +207,28 @@ pcl::modeler::RenderWindow::updateAxes()
   double bounds[6];
   bb.GetBounds(bounds);
   axes_->SetBounds(bounds);
+#if VTK_MAJOR_VERSION > 8
+  axes_->SetCamera(
+      renderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera());
+#else
   axes_->SetCamera(
       GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera());
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl::modeler::RenderWindow::setShowAxes(bool flag)
 {
+#if VTK_MAJOR_VERSION > 8
+  if (flag)
+    renderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(axes_);
+  else
+    renderWindow()->GetRenderers()->GetFirstRenderer()->RemoveActor(axes_);
+#else
   if (flag)
     GetRenderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(axes_);
   else
     GetRenderWindow()->GetRenderers()->GetFirstRenderer()->RemoveActor(axes_);
+#endif
 }

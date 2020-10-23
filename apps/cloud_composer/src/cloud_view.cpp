@@ -5,20 +5,31 @@
 #include <pcl/apps/cloud_composer/point_selectors/selection_event.h>
 #include <pcl/apps/cloud_composer/point_selectors/manipulation_event.h>
 
+#include <vtkGenericOpenGLRenderWindow.h>
+
 #include <QDebug>
 
-#include <QVTKWidget.h>
 
 pcl::cloud_composer::CloudView::CloudView (QWidget* parent)
   : QWidget (parent)
 {
-  vis_.reset (new pcl::visualization::PCLVisualizer ("", false));
-  vis_->getInteractorStyle ()->setKeyboardModifier (pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
+  qvtk_ = new PCLQVTKWidget(this);
   //Create the QVTKWidget
-  qvtk_ = new QVTKWidget (this);
-  qvtk_->SetRenderWindow (vis_->getRenderWindow ());
+#if VTK_MAJOR_VERSION > 8
+  auto renderer = vtkSmartPointer<vtkRenderer>::New();
+  auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+  renderWindow->AddRenderer(renderer);
+  vis_.reset(new pcl::visualization::PCLVisualizer(renderer, renderWindow, "", false));
+  qvtk_->setRenderWindow(vis_->getRenderWindow());
+  vis_->setupInteractor(qvtk_->interactor(), qvtk_->renderWindow(), style_switch_);
+#else
+  vis_.reset(new pcl::visualization::PCLVisualizer("", false));
+  qvtk_->SetRenderWindow(vis_->getRenderWindow());
+  vis_->setupInteractor(qvtk_->GetInteractor(), qvtk_->GetRenderWindow(), style_switch_);
+#endif
+  
+  vis_->getInteractorStyle()->setKeyboardModifier(pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
   initializeInteractorSwitch ();
-  vis_->setupInteractor (qvtk_->GetInteractor (), qvtk_->GetRenderWindow (), style_switch_);
   
   QGridLayout *mainLayout = new QGridLayout (this);
   mainLayout-> addWidget (qvtk_,0,0);
@@ -28,13 +39,23 @@ pcl::cloud_composer::CloudView::CloudView (ProjectModel* model, QWidget* parent)
   : QWidget (parent)
 {
   model_ = model;
-  vis_.reset (new pcl::visualization::PCLVisualizer ("", false));
- // vis_->getInteractorStyle ()->setKeyboardModifier (pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
-  //Create the QVTKWidget
-  qvtk_ = new QVTKWidget (this);
-  qvtk_->SetRenderWindow (vis_->getRenderWindow ());
+  
+  qvtk_ = new PCLQVTKWidget(this);
+ //Create the QVTKWidget
+#if VTK_MAJOR_VERSION > 8
+  auto renderer = vtkSmartPointer<vtkRenderer>::New();
+  auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+  renderWindow->AddRenderer(renderer);
+  vis_.reset(new pcl::visualization::PCLVisualizer(renderer,renderWindow,"", false));
+  qvtk_->setRenderWindow(vis_->getRenderWindow());
+  vis_->setupInteractor(qvtk_->interactor(), qvtk_->renderWindow(), style_switch_);
+#else
+  vis_.reset(new pcl::visualization::PCLVisualizer("", false));
+  qvtk_->SetRenderWindow(vis_->getRenderWindow());
+  vis_->setupInteractor(qvtk_->GetInteractor(), qvtk_->GetRenderWindow(), style_switch_);
+#endif
+
   initializeInteractorSwitch ();
-  vis_->setupInteractor (qvtk_->GetInteractor (), qvtk_->GetRenderWindow (), style_switch_);
   setModel(model);
   
   QGridLayout *mainLayout = new QGridLayout (this);
@@ -57,7 +78,7 @@ pcl::cloud_composer::CloudView::setModel (ProjectModel* new_model)
   connectSignalsAndSlots();
   //Refresh the view
   qvtk_->show();
-  qvtk_->update ();
+  refresh();
   
  // vis_->addOrientationMarkerWidgetAxes (qvtk_->GetInteractor ());
 }
@@ -76,7 +97,11 @@ pcl::cloud_composer::CloudView::connectSignalsAndSlots()
 void
 pcl::cloud_composer::CloudView::refresh ()
 {
+#if VTK_MAJOR_VERSION > 8
+  qvtk_->renderWindow()->Render();
+#else
   qvtk_->update (); 
+#endif
 }
 
 void
@@ -88,7 +113,7 @@ pcl::cloud_composer::CloudView::itemChanged (QStandardItem* changed_item)
   {
     item->paintView (vis_);
   }
-  qvtk_->update ();
+  refresh();
 }
 
 
@@ -115,8 +140,7 @@ pcl::cloud_composer::CloudView::rowsInserted (const QModelIndex& parent, int sta
       rowsInserted(new_item->index(),0,new_item->rowCount ()-1);
   }
   
-  qvtk_->update ();
-
+  refresh();
 }
 
 void
@@ -143,20 +167,20 @@ pcl::cloud_composer::CloudView::rowsAboutToBeRemoved (const QModelIndex& parent,
     if (item_to_remove->rowCount () > 0) 
       rowsAboutToBeRemoved(item_to_remove->index(),0,item_to_remove->rowCount ()-1);
   }
-  qvtk_->update ();
+  refresh();
 }
 
 
 void 
 pcl::cloud_composer::CloudView::paintEvent (QPaintEvent*)
 {
-  qvtk_->update ();
+  refresh();
 }
 
 void 
 pcl::cloud_composer::CloudView::resizeEvent (QResizeEvent*)
 {
-  qvtk_->update ();
+  refresh();
 }
 
 void
@@ -186,7 +210,7 @@ pcl::cloud_composer::CloudView::selectedItemChanged (const QItemSelection & sele
       }
     }
   }
-  qvtk_->update ();
+  refresh();
 }
 
 void
@@ -204,14 +228,18 @@ pcl::cloud_composer::CloudView::setAxisVisibility (bool visible)
   if (visible)
   {
     qDebug () << "Adding coordinate system!";
-    vis_->addOrientationMarkerWidgetAxes ( qvtk_->GetInteractor() );
+#if VTK_MAJOR_VERSION > 8
+    vis_->addOrientationMarkerWidgetAxes(qvtk_->interactor());
+#else
+    vis_->addOrientationMarkerWidgetAxes(qvtk_->GetInteractor());
+#endif
   }
   else
   {
     vis_->removeOrientationMarkerWidgetAxes ();
   }
 
-  qvtk_->update ();
+  refresh();
 }
 
 void
@@ -224,7 +252,11 @@ pcl::cloud_composer::CloudView::addOrientationMarkerWidgetAxes ()
     axes_widget_ = vtkSmartPointer<vtkOrientationMarkerWidget>::New ();
     axes_widget_->SetOutlineColor ( 0.9300, 0.5700, 0.1300 );
     axes_widget_->SetOrientationMarker( axes );
+#if VTK_MAJOR_VERSION > 8
+    axes_widget_->SetInteractor(qvtk_->interactor());
+#else
     axes_widget_->SetInteractor( qvtk_->GetInteractor () );
+#endif
     axes_widget_->SetViewport( 0.0, 0.0, 0.4, 0.4 );
     axes_widget_->SetEnabled( 1 );
     axes_widget_->InteractiveOn();
@@ -244,8 +276,6 @@ pcl::cloud_composer::CloudView::removeOrientationMarkerWidgetAxes ()
   {
     axes_widget_->SetEnabled (false);
   }
-  
-  
 }
 
 ////////  Interactor Functions
@@ -255,7 +285,11 @@ pcl::cloud_composer::CloudView::initializeInteractorSwitch ()
 {
   style_switch_ = vtkSmartPointer<InteractorStyleSwitch>::New();
   style_switch_->initializeInteractorStyles (vis_, model_);
+#if VTK_MAJOR_VERSION > 8
+  style_switch_->SetInteractor(qvtk_->interactor());
+#else
   style_switch_->SetInteractor (qvtk_->GetInteractor ());
+#endif
   style_switch_->setCurrentInteractorStyle (interactor_styles::PCL_VISUALIZER);
   
   //Connect the events!

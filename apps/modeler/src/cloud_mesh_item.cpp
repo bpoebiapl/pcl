@@ -156,12 +156,16 @@ void
 pcl::modeler::CloudMeshItem::createChannels()
 {
   RenderWindowItem* render_window_item = dynamic_cast<RenderWindowItem*>(parent());
-  addChild(new PointsActorItem(
-      this, cloud_mesh_, render_window_item->getRenderWindow()->GetRenderWindow()));
-  addChild(new NormalsActorItem(
-      this, cloud_mesh_, render_window_item->getRenderWindow()->GetRenderWindow()));
-  addChild(new SurfaceActorItem(
-      this, cloud_mesh_, render_window_item->getRenderWindow()->GetRenderWindow()));
+#if VTK_MAJOR_VERSION > 8
+  vtkRenderWindow* win = render_window_item->getRenderWindow()->renderWindow();
+#else
+  vtkRenderWindow* win = render_window_item->getRenderWindow()->GetRenderWindow();
+#endif
+
+  addChild(new PointsActorItem(this, cloud_mesh_, win));
+  addChild(new NormalsActorItem(this, cloud_mesh_, win));
+  addChild(new SurfaceActorItem(this, cloud_mesh_, win));
+
   for (int i = 0, i_end = childCount(); i < i_end; ++i) {
     ChannelActorItem* child_item = dynamic_cast<ChannelActorItem*>(child(i));
     child_item->init();
@@ -241,8 +245,13 @@ pcl::modeler::CloudMeshItem::updateRenderWindow()
   RenderWindowItem* render_window_item = dynamic_cast<RenderWindowItem*>(parent());
   for (int i = 0, i_end = childCount(); i < i_end; ++i) {
     ChannelActorItem* child_item = dynamic_cast<ChannelActorItem*>(child(i));
+#if VTK_MAJOR_VERSION > 8
+    child_item->switchRenderWindow(
+        render_window_item->getRenderWindow()->renderWindow());
+#else
     child_item->switchRenderWindow(
         render_window_item->getRenderWindow()->GetRenderWindow());
+#endif
   }
 
   render_window_item->getRenderWindow()->updateAxes();
