@@ -76,11 +76,7 @@ pcl::modeler::RenderWindow::~RenderWindow()
 void
 pcl::modeler::RenderWindow::initRenderer()
 {
-#if VTK_MAJOR_VERSION > 8
-  vtkSmartPointer<vtkRenderWindow> win = renderWindow();
-#else
-  vtkSmartPointer<vtkRenderWindow> win = GetRenderWindow();
-#endif
+  vtkSmartPointer<vtkRenderWindow> win = getRenderWindowCompat(this);
   vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
   win->AddRenderer(renderer);
 
@@ -134,11 +130,7 @@ pcl::modeler::RenderWindow::setTitle(const QString& title)
 void
 pcl::modeler::RenderWindow::render()
 {
-#if VTK_MAJOR_VERSION > 8
-  renderWindow()->Render();
-#else
-  GetRenderWindow()->Render();
-#endif
+  getRenderWindowCompat(this)->Render();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,14 +138,11 @@ void
 pcl::modeler::RenderWindow::resetCamera()
 {
   double bounds[6];
-#if VTK_MAJOR_VERSION > 8
-  renderWindow()->GetRenderers()->GetFirstRenderer()->ComputeVisiblePropBounds(bounds);
-  renderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera(bounds);
-#else
-  GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ComputeVisiblePropBounds(
-      bounds);
-  GetRenderWindow()->GetRenderers()->GetFirstRenderer()->ResetCamera(bounds);
-#endif
+  getRenderWindowCompat(this)
+      ->GetRenderers()
+      ->GetFirstRenderer()
+      ->ComputeVisiblePropBounds(bounds);
+  getRenderWindowCompat(this)->GetRenderers()->GetFirstRenderer()->ResetCamera(bounds);
   render();
 }
 
@@ -161,22 +150,16 @@ pcl::modeler::RenderWindow::resetCamera()
 void
 pcl::modeler::RenderWindow::getBackground(double& r, double& g, double& b)
 {
-#if VTK_MAJOR_VERSION > 8
-  renderWindow()->GetRenderers()->GetFirstRenderer()->GetBackground(r, g, b);
-#else
-  GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetBackground(r, g, b);
-#endif
+  getRenderWindowCompat(this)->GetRenderers()->GetFirstRenderer()->GetBackground(
+      r, g, b);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl::modeler::RenderWindow::setBackground(double r, double g, double b)
 {
-#if VTK_MAJOR_VERSION > 8
-  renderWindow()->GetRenderers()->GetFirstRenderer()->SetBackground(r, g, b);
-#else
-  GetRenderWindow()->GetRenderers()->GetFirstRenderer()->SetBackground(r, g, b);
-#endif
+  getRenderWindowCompat(this)->GetRenderers()->GetFirstRenderer()->SetBackground(
+      r, g, b);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,13 +168,8 @@ pcl::modeler::RenderWindow::updateAxes()
 {
   vtkBoundingBox bb;
 
-#if VTK_MAJOR_VERSION > 8
   vtkActorCollection* actors =
-      renderWindow()->GetRenderers()->GetFirstRenderer()->GetActors();
-#else
-  vtkActorCollection* actors =
-      GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActors();
-#endif
+      getRenderWindowCompat(this)->GetRenderers()->GetFirstRenderer()->GetActors();
 
   actors->InitTraversal();
   for (int i = 0, i_end = actors->GetNumberOfItems(); i < i_end; ++i) {
@@ -207,28 +185,18 @@ pcl::modeler::RenderWindow::updateAxes()
   double bounds[6];
   bb.GetBounds(bounds);
   axes_->SetBounds(bounds);
-#if VTK_MAJOR_VERSION > 8
-  axes_->SetCamera(
-      renderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera());
-#else
-  axes_->SetCamera(
-      GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera());
-#endif
+  axes_->SetCamera(getRenderWindowCompat(this)
+                       ->GetRenderers()
+                       ->GetFirstRenderer()
+                       ->GetActiveCamera());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl::modeler::RenderWindow::setShowAxes(bool flag)
 {
-#if VTK_MAJOR_VERSION > 8
   if (flag)
-    renderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(axes_);
+    getRenderWindowCompat(this)->GetRenderers()->GetFirstRenderer()->AddActor(axes_);
   else
-    renderWindow()->GetRenderers()->GetFirstRenderer()->RemoveActor(axes_);
-#else
-  if (flag)
-    GetRenderWindow()->GetRenderers()->GetFirstRenderer()->AddActor(axes_);
-  else
-    GetRenderWindow()->GetRenderers()->GetFirstRenderer()->RemoveActor(axes_);
-#endif
+    getRenderWindowCompat(this)->GetRenderers()->GetFirstRenderer()->RemoveActor(axes_);
 }

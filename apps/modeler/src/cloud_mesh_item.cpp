@@ -156,11 +156,7 @@ void
 pcl::modeler::CloudMeshItem::createChannels()
 {
   RenderWindowItem* render_window_item = dynamic_cast<RenderWindowItem*>(parent());
-#if VTK_MAJOR_VERSION > 8
-  vtkRenderWindow* win = render_window_item->getRenderWindow()->renderWindow();
-#else
-  vtkRenderWindow* win = render_window_item->getRenderWindow()->GetRenderWindow();
-#endif
+  vtkRenderWindow* win = getRenderWindowCompat(render_window_item->getRenderWindow());
 
   addChild(new PointsActorItem(this, cloud_mesh_, win));
   addChild(new NormalsActorItem(this, cloud_mesh_, win));
@@ -245,13 +241,8 @@ pcl::modeler::CloudMeshItem::updateRenderWindow()
   RenderWindowItem* render_window_item = dynamic_cast<RenderWindowItem*>(parent());
   for (int i = 0, i_end = childCount(); i < i_end; ++i) {
     ChannelActorItem* child_item = dynamic_cast<ChannelActorItem*>(child(i));
-#if VTK_MAJOR_VERSION > 8
     child_item->switchRenderWindow(
-        render_window_item->getRenderWindow()->renderWindow());
-#else
-    child_item->switchRenderWindow(
-        render_window_item->getRenderWindow()->GetRenderWindow());
-#endif
+        getRenderWindowCompat(render_window_item->getRenderWindow()));
   }
 
   render_window_item->getRenderWindow()->updateAxes();
