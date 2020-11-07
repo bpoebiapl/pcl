@@ -50,7 +50,7 @@ pcl::cloud_composer::CloudView::CloudView (ProjectModel* model, QWidget* parent)
 #endif
   setRenderWindowCompat(qvtk_, vis_->getRenderWindow());
   vis_->setupInteractor(getInteractorCompat(qvtk_), getRenderWindowCompat(qvtk_), style_switch_);
-  vis_->getInteractorStyle()->setKeyboardModifier(pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
+  //vis_->getInteractorStyle()->setKeyboardModifier(pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
 
   initializeInteractorSwitch ();
   setModel(model);
