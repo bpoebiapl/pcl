@@ -173,10 +173,10 @@ pcl::visualization::details::fillCells(std::vector<int>& lookup, const std::vect
   }
 #endif
 
-  const auto idx = vertices.size() + std::accumulate(vertices.begin(), vertices.end(), 0,
+  const auto idx = static_cast<vtkIdType>(vertices.size()) + std::accumulate(vertices.begin(), vertices.end(), 0,
     [](const auto& sum, const auto& vertex) { return sum + vertex.vertices.size(); });
 
-  return static_cast<vtkIdType>(idx);
+  return idx;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
