@@ -47,13 +47,11 @@ pcl::cloud_composer::FPFHItem::getInspectorTabs ()
   //Plot the histogram
   plot_->addFeatureHistogram (*fpfh_ptr_, fpfh_ptr_->width, data(ItemDataRole::ITEM_ID).toString().toStdString ());
   //Set the render window of the QVTK widget, update
+  plot_->setViewInteractor(getInteractorCompat(qvtk_));
+  setRenderWindowCompat(qvtk_, plot_->getRenderWindow());
 #if VTK_MAJOR_VERSION > 8
-  plot_->setViewInteractor(vtkSmartPointer<vtkRenderWindowInteractor>(qvtk_->interactor()));
-  qvtk_->setRenderWindow(plot_->getRenderWindow());
   qvtk_->renderWindow()->Render();
 #else
-  plot_->setViewInteractor (vtkSmartPointer<vtkRenderWindowInteractor> (qvtk_->GetInteractor ()));
-  qvtk_->SetRenderWindow(plot_->getRenderWindow());
   qvtk_->update();
 #endif
   qvtk_->show ();

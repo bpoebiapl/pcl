@@ -89,13 +89,11 @@ PCDVideoPlayer::PCDVideoPlayer()
   auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
   renderWindow->AddRenderer(renderer);
   vis_.reset(new pcl::visualization::PCLVisualizer(renderer, renderWindow, "", false));
-  ui_->qvtk_widget->setRenderWindow(vis_->getRenderWindow());
-  vis_->setupInteractor(ui_->qvtk_widget->interactor(), ui_->qvtk_widget->renderWindow());
 #else
   vis_.reset(new pcl::visualization::PCLVisualizer("", false));
-  ui_->qvtk_widget->SetRenderWindow(vis_->getRenderWindow());
-  vis_->setupInteractor(ui_->qvtk_widget->GetInteractor(), ui_->qvtk_widget->GetRenderWindow());
 #endif
+  setRenderWindowCompat(ui_->qvtk_widget,vis_->getRenderWindow());
+  vis_->setupInteractor(getInteractorCompat(ui_->qvtk_widget), getRenderWindowCompat(ui_->qvtk_widget));
 
   vis_->getInteractorStyle()->setKeyboardModifier(pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
 
