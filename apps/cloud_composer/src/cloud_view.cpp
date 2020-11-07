@@ -20,15 +20,13 @@ pcl::cloud_composer::CloudView::CloudView (QWidget* parent)
   auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
   renderWindow->AddRenderer(renderer);
   vis_.reset(new pcl::visualization::PCLVisualizer(renderer, renderWindow, "", false));
-  qvtk_->setRenderWindow(vis_->getRenderWindow());
-  vis_->setupInteractor(qvtk_->interactor(), qvtk_->renderWindow(), style_switch_);
 #else
   vis_.reset(new pcl::visualization::PCLVisualizer("", false));
-  qvtk_->SetRenderWindow(vis_->getRenderWindow());
-  vis_->setupInteractor(qvtk_->GetInteractor(), qvtk_->GetRenderWindow(), style_switch_);
 #endif
-  
+  setRenderWindowCompat(qvtk_, vis_->getRenderWindow());
+  vis_->setupInteractor(getInteractorCompat(qvtk_), getRenderWindowCompat(qvtk_), style_switch_);
   vis_->getInteractorStyle()->setKeyboardModifier(pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
+  
   initializeInteractorSwitch ();
   
   QGridLayout *mainLayout = new QGridLayout (this);
@@ -41,19 +39,18 @@ pcl::cloud_composer::CloudView::CloudView (ProjectModel* model, QWidget* parent)
   model_ = model;
   
   qvtk_ = new PCLQVTKWidget(this);
- //Create the QVTKWidget
+  //Create the QVTKWidget
 #if VTK_MAJOR_VERSION > 8
   auto renderer = vtkSmartPointer<vtkRenderer>::New();
   auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
   renderWindow->AddRenderer(renderer);
-  vis_.reset(new pcl::visualization::PCLVisualizer(renderer,renderWindow,"", false));
-  qvtk_->setRenderWindow(vis_->getRenderWindow());
-  vis_->setupInteractor(qvtk_->interactor(), qvtk_->renderWindow(), style_switch_);
+  vis_.reset(new pcl::visualization::PCLVisualizer(renderer, renderWindow, "", false));
 #else
   vis_.reset(new pcl::visualization::PCLVisualizer("", false));
-  qvtk_->SetRenderWindow(vis_->getRenderWindow());
-  vis_->setupInteractor(qvtk_->GetInteractor(), qvtk_->GetRenderWindow(), style_switch_);
 #endif
+  setRenderWindowCompat(qvtk_, vis_->getRenderWindow());
+  vis_->setupInteractor(getInteractorCompat(qvtk_), getRenderWindowCompat(qvtk_), style_switch_);
+  vis_->getInteractorStyle()->setKeyboardModifier(pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
 
   initializeInteractorSwitch ();
   setModel(model);
@@ -80,7 +77,7 @@ pcl::cloud_composer::CloudView::setModel (ProjectModel* new_model)
   qvtk_->show();
   refresh();
   
- // vis_->addOrientationMarkerWidgetAxes (qvtk_->GetInteractor ());
+ // vis_->addOrientationMarkerWidgetAxes (getInteractorCompat(qvtk_));
 }
 
 void
@@ -228,11 +225,7 @@ pcl::cloud_composer::CloudView::setAxisVisibility (bool visible)
   if (visible)
   {
     qDebug () << "Adding coordinate system!";
-#if VTK_MAJOR_VERSION > 8
-    vis_->addOrientationMarkerWidgetAxes(qvtk_->interactor());
-#else
-    vis_->addOrientationMarkerWidgetAxes(qvtk_->GetInteractor());
-#endif
+    vis_->addOrientationMarkerWidgetAxes(getInteractorCompat(qvtk_));
   }
   else
   {
@@ -252,11 +245,7 @@ pcl::cloud_composer::CloudView::addOrientationMarkerWidgetAxes ()
     axes_widget_ = vtkSmartPointer<vtkOrientationMarkerWidget>::New ();
     axes_widget_->SetOutlineColor ( 0.9300, 0.5700, 0.1300 );
     axes_widget_->SetOrientationMarker( axes );
-#if VTK_MAJOR_VERSION > 8
-    axes_widget_->SetInteractor(qvtk_->interactor());
-#else
-    axes_widget_->SetInteractor( qvtk_->GetInteractor () );
-#endif
+    axes_widget_->SetInteractor(getInteractorCompat(qvtk_));
     axes_widget_->SetViewport( 0.0, 0.0, 0.4, 0.4 );
     axes_widget_->SetEnabled( 1 );
     axes_widget_->InteractiveOn();
@@ -285,11 +274,7 @@ pcl::cloud_composer::CloudView::initializeInteractorSwitch ()
 {
   style_switch_ = vtkSmartPointer<InteractorStyleSwitch>::New();
   style_switch_->initializeInteractorStyles (vis_, model_);
-#if VTK_MAJOR_VERSION > 8
-  style_switch_->SetInteractor(qvtk_->interactor());
-#else
-  style_switch_->SetInteractor (qvtk_->GetInteractor ());
-#endif
+  style_switch_->SetInteractor(getInteractorCompat(qvtk_));
   style_switch_->setCurrentInteractorStyle (interactor_styles::PCL_VISUALIZER);
   
   //Connect the events!
