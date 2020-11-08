@@ -54,7 +54,12 @@
 #include <pcl/memory.h>  // for pcl::make_shared
 #include <pcl/point_types.h>
 #include <pcl/console/parse.h>
-#include <pcl/visualization/vtk.h>
+
+#include <vtkGeneralTransform.h>
+#include <vtkPlatonicSolidSource.h>
+#include <vtkLoopSubdivisionFilter.h>
+#include <vtkCellLocator.h>
+#include <vtkMath.h>
 
 #include <boost/algorithm/string.hpp>  // for boost::is_any_of, boost::split, boost::token_compress_on, boost::trim
 #include <boost/filesystem.hpp>  // for boost::filesystem::create_directories, boost::filesystem::exists, boost::filesystem::extension, boost::filesystem::path
@@ -368,7 +373,7 @@ main (int argc, char** argv)
             pt.z = static_cast<float> (-right[2]*x[1] + up[2]*x[2] + viewray[2]*x[0] + eye[2]);
             pt.vp_x = pt.vp_y = pt.vp_z = 0.0f;
           }
-          cloud.points.push_back (pt);
+          cloud.push_back (pt);
         }
         else
           if (organized)
@@ -378,7 +383,7 @@ main (int argc, char** argv)
             pt.vp_x = static_cast<float> (eye[0]);
             pt.vp_y = static_cast<float> (eye[1]);
             pt.vp_z = static_cast<float> (eye[2]);
-            cloud.points.push_back (pt);
+            cloud.push_back (pt);
           }
       } // Horizontal
     } // Vertical

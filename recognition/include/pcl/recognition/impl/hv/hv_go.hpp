@@ -38,6 +38,7 @@
 #define PCL_RECOGNITION_IMPL_HV_GO_HPP_
 
 #include <pcl/recognition/hv/hv_go.h>
+#include <pcl/common/common.h> // for getMinMax3D
 #include <pcl/common/time.h>
 #include <pcl/point_types.h>
 
@@ -173,7 +174,7 @@ mets::gol_type pcl::GlobalHypothesesVerification<ModelT, SceneT>::evaluateSoluti
   setPreviousBadInfo (bad_info);
 
   int n_active_hyp = 0;
-  for(const bool &i : active) {
+  for(const bool i : active) {
     if(i)
       n_active_hyp++;
   }

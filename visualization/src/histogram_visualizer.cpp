@@ -45,7 +45,6 @@
 #include <pcl/visualization/boost.h>
 
 #include <vtkVersion.h>
-#include <vtkXYPlotActor.h>
 #include <vtkDoubleArray.h>
 #include <vtkTextProperty.h>
 #include <vtkRenderWindow.h>
@@ -287,7 +286,7 @@ pcl::visualization::PCLHistogramVisualizer::addFeatureHistogram (
   int field_idx = pcl::getFieldIndex (cloud, field_name);
   if (field_idx == -1)
   {
-    PCL_ERROR ("[addFeatureHistogram] Invalid field (%s) given!", field_name.c_str ());
+    PCL_ERROR ("[addFeatureHistogram] Invalid field (%s) given!\n", field_name.c_str ());
     return (false);
   }
 
@@ -304,7 +303,7 @@ pcl::visualization::PCLHistogramVisualizer::addFeatureHistogram (
 
   // Parse the cloud data and store it in the array
   double xy[2];
-  for (unsigned int d = 0; d < cloud.fields[field_idx].count; ++d)
+  for (uindex_t d = 0; d < cloud.fields[field_idx].count; ++d)
   {
     xy[0] = d;
     float data;
@@ -361,7 +360,7 @@ pcl::visualization::PCLHistogramVisualizer::addFeatureHistogram (
 
   // Parse the cloud data and store it in the array
   double xy[2];
-  for (unsigned int d = 0; d < cloud.fields[field_idx].count; ++d)
+  for (uindex_t d = 0; d < cloud.fields[field_idx].count; ++d)
   {
     xy[0] = d;
     float data;
@@ -405,7 +404,7 @@ pcl::visualization::PCLHistogramVisualizer::updateFeatureHistogram (
 
   // Parse the cloud data and store it in the array
   double xy[2];
-  for (unsigned int d = 0; d < cloud.fields[field_idx].count; ++d)
+  for (uindex_t d = 0; d < cloud.fields[field_idx].count; ++d)
   {
     xy[0] = d;
     float data;
@@ -456,7 +455,7 @@ pcl::visualization::PCLHistogramVisualizer::updateFeatureHistogram (
 
   // Parse the cloud data and store it in the array
   double xy[2];
-  for (unsigned int d = 0; d < cloud.fields[field_idx].count; ++d)
+  for (uindex_t d = 0; d < cloud.fields[field_idx].count; ++d)
   {
     xy[0] = d;
     float data;

@@ -39,8 +39,6 @@
 #include <pcl/common/time.h>
 #include <pcl/common/transforms.h>
 #include <pcl/console/parse.h>
-#include <pcl/features/integral_image_normal.h>
-#include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/extract_indices.h>
@@ -48,10 +46,8 @@
 #include <pcl/filters/project_inliers.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/openni_grabber.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
-#include <pcl/search/pcl_search.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/segmentation/sac_segmentation.h>
@@ -445,7 +441,7 @@ public:
       point.y = (*cloud)[i].y;
       point.z = (*cloud)[i].z;
       point.rgba = (*cloud)[i].rgba;
-      result.points.push_back(point);
+      result.push_back(point);
     }
   }
 
@@ -476,7 +472,7 @@ public:
       if (!(std::abs(point.x) < 0.01 && std::abs(point.y) < 0.01 &&
             std::abs(point.z) < 0.01) &&
           !std::isnan(point.x) && !std::isnan(point.y) && !std::isnan(point.z))
-        result.points.push_back(point);
+        result.push_back(point);
     }
 
     result.width = result.size();
@@ -491,9 +487,9 @@ public:
                         Cloud& result)
   {
     pcl::PointIndices segmented_indices = cluster_indices[segment_index];
-    for (const int& index : segmented_indices.indices) {
+    for (const auto& index : segmented_indices.indices) {
       PointType point = (*cloud)[index];
-      result.points.push_back(point);
+      result.push_back(point);
     }
     result.width = result.size();
     result.height = 1;

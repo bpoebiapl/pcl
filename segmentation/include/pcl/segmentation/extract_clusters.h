@@ -39,9 +39,11 @@
 
 #pragma once
 
+#include <pcl/console/print.h> // for PCL_ERROR
 #include <pcl/pcl_base.h>
 
-#include <pcl/search/pcl_search.h>
+#include <pcl/search/search.h> // for Search
+#include <pcl/search/kdtree.h> // for KdTree
 
 namespace pcl
 {
@@ -76,7 +78,7 @@ namespace pcl
     */
   template <typename PointT> void 
   extractEuclideanClusters (
-      const PointCloud<PointT> &cloud, const std::vector<int> &indices,
+      const PointCloud<PointT> &cloud, const Indices &indices,
       const typename search::Search<PointT>::Ptr &tree, float tolerance, std::vector<PointIndices> &clusters,
       unsigned int min_pts_per_cluster = 1, unsigned int max_pts_per_cluster = (std::numeric_limits<int>::max) ());
 
@@ -122,7 +124,7 @@ namespace pcl
     // Create a bool vector of processed point indices, and initialize it to false
     std::vector<bool> processed (cloud.size (), false);
 
-    std::vector<int> nn_indices;
+    Indices nn_indices;
     std::vector<float> nn_distances;
     // Process all points in the indices vector
     for (std::size_t i = 0; i < cloud.size (); ++i)
@@ -130,9 +132,9 @@ namespace pcl
       if (processed[i])
         continue;
 
-      std::vector<unsigned int> seed_queue;
+      Indices seed_queue;
       int sq_idx = 0;
-      seed_queue.push_back (static_cast<int> (i));
+      seed_queue.push_back (static_cast<index_t> (i));
 
       processed[i] = true;
 
@@ -202,7 +204,7 @@ namespace pcl
   template <typename PointT, typename Normal> 
   void extractEuclideanClusters (
       const PointCloud<PointT> &cloud, const PointCloud<Normal> &normals,
-      const std::vector<int> &indices, const typename KdTree<PointT>::Ptr &tree,
+      const Indices &indices, const typename KdTree<PointT>::Ptr &tree,
       float tolerance, std::vector<PointIndices> &clusters, double eps_angle,
       unsigned int min_pts_per_cluster = 1,
       unsigned int max_pts_per_cluster = (std::numeric_limits<int>::max) ())
@@ -233,7 +235,7 @@ namespace pcl
     // Create a bool vector of processed point indices, and initialize it to false
     std::vector<bool> processed (cloud.size (), false);
 
-    std::vector<int> nn_indices;
+    Indices nn_indices;
     std::vector<float> nn_distances;
     // Process all points in the indices vector
     for (std::size_t i = 0; i < indices.size (); ++i)
@@ -241,7 +243,7 @@ namespace pcl
       if (processed[indices[i]])
         continue;
 
-      std::vector<int> seed_queue;
+      Indices seed_queue;
       int sq_idx = 0;
       seed_queue.push_back (indices[i]);
 

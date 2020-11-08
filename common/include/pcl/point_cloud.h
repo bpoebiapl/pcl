@@ -51,7 +51,6 @@
 #include <pcl/type_traits.h>
 #include <pcl/types.h>
 
-#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -135,14 +134,6 @@ namespace pcl
       PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
 
-  namespace detail
-  {
-    template <typename PointT>
-    PCL_DEPRECATED(1, 12, "use createMapping() instead")
-    shared_ptr<pcl::MsgFieldMap>&
-    getMapping (pcl::PointCloud<PointT>& p);
-  } // namespace detail
-
   /** \brief PointCloud represents the base class in PCL for storing collections of 3D points.
     *
     * The class is templated, which means you need to specify the type of data
@@ -185,20 +176,6 @@ namespace pcl
         * sensor_orientation_ to identity.
         */
       PointCloud () = default;
-
-      /** \brief Copy constructor.
-        * \param[in] pc the cloud to copy into this
-        * \todo Erase once mapping_ is removed.
-        */
-      // Ignore unknown pragma warning on MSVC (4996)
-      #pragma warning(push)
-      #pragma warning(disable: 4068)
-      // Ignore deprecated warning on clang compilers
-      #pragma clang diagnostic push
-      #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-      PointCloud (const PointCloud<PointT> &pc) = default;
-      #pragma clang diagnostic pop
-      #pragma warning(pop)
 
       /** \brief Copy constructor from point cloud subset
         * \param[in] pc the cloud to copy into this
@@ -258,7 +235,7 @@ namespace pcl
 
         // libstdc++ (GCC) on calling reserve allocates new memory, copies and deallocates old vector
         // This causes a drastic performance hit. Prefer not to use reserve with libstdc++ (default on clang)
-        cloud1.points.insert (cloud1.points.end (), cloud2.points.begin (), cloud2.points.end ());
+        cloud1.insert (cloud1.end (), cloud2.begin (), cloud2.end ());
 
         cloud1.width    = cloud1.size ();
         cloud1.height   = 1;
@@ -703,26 +680,9 @@ namespace pcl
       inline Ptr
       makeShared () const { return Ptr (new PointCloud<PointT> (*this)); }
 
-    protected:
-      /** \brief This is motivated by ROS integration. Users should not need to access mapping_.
-        * \todo Once mapping_ is removed, erase the explicitly defined copy constructor in PointCloud.
-        */
-      PCL_DEPRECATED(1, 12, "rewrite your code to avoid using this protected field") shared_ptr<MsgFieldMap> mapping_;
-
-      friend shared_ptr<MsgFieldMap>& detail::getMapping<PointT>(pcl::PointCloud<PointT> &p);
-
-    public:
       PCL_MAKE_ALIGNED_OPERATOR_NEW
   };
 
-  namespace detail
-  {
-    template <typename PointT> shared_ptr<pcl::MsgFieldMap>&
-    getMapping (pcl::PointCloud<PointT>& p)
-    {
-      return (p.mapping_);
-    }
-  } // namespace detail
 
   template <typename PointT> std::ostream&
   operator << (std::ostream& s, const pcl::PointCloud<PointT> &p)

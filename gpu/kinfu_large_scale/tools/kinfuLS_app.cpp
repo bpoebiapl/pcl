@@ -63,6 +63,7 @@ Work in progress: patch by Marco (AUG,19th 2012)
 #include <pcl/gpu/containers/initialization.h>
 
 #include <pcl/common/time.h>
+#include <pcl/common/transforms.h> // for transformPoint
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/image_viewer.h>
@@ -1033,7 +1034,7 @@ struct KinFuLSApp
         c = capture_.registerCallback (func2);
       }
       #else
-      PCL_ERROR ("OpenNI2 is disabled in this PCL. Please build PCL with OpenNI2 feature.");
+      PCL_ERROR ("OpenNI2 is disabled in this PCL. Please build PCL with OpenNI2 feature.\n");
       #endif
     }
     else
@@ -1064,7 +1065,7 @@ struct KinFuLSApp
         c = capture_.registerCallback (func2);
       }
       #else
-      PCL_ERROR ("OpenNI is disabled in this PCL. Please build PCL with OpenNI feature.");
+      PCL_ERROR ("OpenNI is disabled in this PCL. Please build PCL with OpenNI feature.\n");
       #endif
     }
 

@@ -39,7 +39,6 @@
 #include <pcl/pcl_macros.h>
 #include "pcl/recognition/hv/occlusion_reasoning.h"
 #include "pcl/recognition/impl/hv/occlusion_reasoning.hpp"
-#include <pcl/common/common.h>
 #include <pcl/search/kdtree.h>
 #include <pcl/filters/voxel_grid.h>
 
@@ -232,7 +231,7 @@ namespace pcl
         //we need to reason about occlusions before setting the model
         if (scene_cloud_ == nullptr)
         {
-          PCL_ERROR("setSceneCloud should be called before adding the model if reasoning about occlusions...");
+          PCL_ERROR("setSceneCloud should be called before adding the model if reasoning about occlusions...\n");
         }
 
         if (!occlusion_cloud_->isOrganized ())

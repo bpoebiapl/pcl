@@ -39,6 +39,8 @@
 #ifndef PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_CIRCLE_3D_HPP_
 #define PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_CIRCLE_3D_HPP_
 
+#include <cfloat> // for DBL_MAX
+
 #include <pcl/sample_consensus/eigen.h>
 #include <pcl/sample_consensus/sac_model_circle3d.h>
 #include <pcl/common/concatenate.h>
@@ -306,7 +308,7 @@ pcl::SampleConsensusModelCircle3D<PointT>::projectPoints (
   if (copy_data_fields)
   {
     // Allocate enough space and copy the basics
-    projected_points.points.resize (input_->size ());
+    projected_points.resize (input_->size ());
     projected_points.width    = input_->width;
     projected_points.height   = input_->height;
 
@@ -348,7 +350,7 @@ pcl::SampleConsensusModelCircle3D<PointT>::projectPoints (
   else
   {
     // Allocate enough space and copy the basics
-    projected_points.points.resize (inliers.size ());
+    projected_points.resize (inliers.size ());
     projected_points.width    = inliers.size ();
     projected_points.height   = 1;
 

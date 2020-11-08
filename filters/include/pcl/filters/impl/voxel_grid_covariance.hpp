@@ -39,10 +39,14 @@
 #define PCL_VOXEL_GRID_COVARIANCE_IMPL_H_
 
 #include <pcl/common/common.h>
-#include <pcl/filters/boost.h>
+#include <pcl/common/point_tests.h> // for isXYZFinite
 #include <pcl/filters/voxel_grid_covariance.h>
-#include <Eigen/Dense>
 #include <Eigen/Cholesky>
+#include <Eigen/Eigenvalues> // for SelfAdjointEigenSolver
+#include <boost/mpl/size.hpp> // for size
+#include <boost/random/mersenne_twister.hpp> // for mt19937
+#include <boost/random/normal_distribution.hpp> // for normal_distribution
+#include <boost/random/variate_generator.hpp> // for variate_generator
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template<typename PointT> void
@@ -55,14 +59,14 @@ pcl::VoxelGridCovariance<PointT>::applyFilter (PointCloud &output)
   {
     PCL_WARN ("[pcl::%s::applyFilter] No input dataset given!\n", getClassName ().c_str ());
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
   // Copy the header (and thus the frame_id) + allocate enough space for points
   output.height = 1;                          // downsampling breaks the organized structure
   output.is_dense = true;                     // we filter out invalid points
-  output.points.clear ();
+  output.clear ();
 
   Eigen::Vector4f min_p, max_p;
   // Get the minimum and maximum dimensions
@@ -256,7 +260,7 @@ pcl::VoxelGridCovariance<PointT>::applyFilter (PointCloud &output)
   }
 
   // Second pass: go over all leaves and compute centroids and covariance matrices
-  output.points.reserve (leaves_.size ());
+  output.reserve (leaves_.size ());
   if (searchable_)
     voxel_centroids_leaf_indices_.reserve (leaves_.size ());
   int cp = 0;
@@ -296,9 +300,9 @@ pcl::VoxelGridCovariance<PointT>::applyFilter (PointCloud &output)
       // Do we need to process all the fields?
       if (!downsample_all_data_)
       {
-        output.points.back ().x = leaf.centroid[0];
-        output.points.back ().y = leaf.centroid[1];
-        output.points.back ().z = leaf.centroid[2];
+        output.back ().x = leaf.centroid[0];
+        output.back ().y = leaf.centroid[1];
+        output.back ().z = leaf.centroid[2];
       }
       else
       {
@@ -306,7 +310,7 @@ pcl::VoxelGridCovariance<PointT>::applyFilter (PointCloud &output)
         // ---[ RGB special case
         if (rgba_index >= 0)
         {
-          pcl::RGB& rgb = *reinterpret_cast<RGB*> (reinterpret_cast<char*> (&output.points.back ()) + rgba_index);
+          pcl::RGB& rgb = *reinterpret_cast<RGB*> (reinterpret_cast<char*> (&output.back ()) + rgba_index);
           rgb.a = leaf.centroid[centroid_size - 4];
           rgb.r = leaf.centroid[centroid_size - 3];
           rgb.g = leaf.centroid[centroid_size - 2];

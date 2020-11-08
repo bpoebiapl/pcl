@@ -38,6 +38,7 @@
 #ifndef PCL_ISS_KEYPOINT3D_IMPL_H_
 #define PCL_ISS_KEYPOINT3D_IMPL_H_
 
+#include <Eigen/Eigenvalues> // for SelfAdjointEigenSolver
 #include <pcl/features/boundary.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/integral_image_normal.h>
@@ -292,7 +293,7 @@ template<typename PointInT, typename PointOutT, typename NormalT> void
 pcl::ISSKeypoint3D<PointInT, PointOutT, NormalT>::detectKeypoints (PointCloudOut &output)
 {
   // Make sure the output cloud is empty
-  output.points.clear ();
+  output.clear ();
 
   if (border_radius_ > 0.0)
     edge_points_ = getBoundaryPoints (*(input_->makeShared ()), border_radius_, angle_threshold_);
@@ -441,7 +442,7 @@ pcl::ISSKeypoint3D<PointInT, PointOutT, NormalT>::detectKeypoints (PointCloudOut
     {
       PointOutT p;
       p.getVector3fMap () = (*input_)[index].getVector3fMap ();
-      output.points.push_back(p);
+      output.push_back(p);
       keypoints_indices_->indices.push_back (index);
     }
   }

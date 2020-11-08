@@ -41,7 +41,8 @@
 #ifndef PCL_FEATURES_IMPL_FEATURE_H_
 #define PCL_FEATURES_IMPL_FEATURE_H_
 
-#include <pcl/search/pcl_search.h>
+#include <pcl/search/kdtree.h> // for KdTree
+#include <pcl/search/organized.h> // for OrganizedNeighbor
 
 
 namespace pcl
@@ -68,7 +69,7 @@ solvePlaneParameters (const Eigen::Matrix3f &covariance_matrix,
 //  for (int i = 0; i < 9; ++i)
 //    if (!std::isfinite (covariance_matrix.coeff (i)))
 //    {
-//      //PCL_WARN ("[pcl::solvePlaneParameteres] Covariance matrix has NaN/Inf values!\n");
+//      //PCL_WARN ("[pcl::solvePlaneParameters] Covariance matrix has NaN/Inf values!\n");
 //      nx = ny = nz = curvature = std::numeric_limits<float>::quiet_NaN ();
 //      return;
 //    }
@@ -195,7 +196,7 @@ Feature<PointInT, PointOutT>::compute (PointCloudOut &output)
   if (!initCompute ())
   {
     output.width = output.height = 0;
-    output.points.clear ();
+    output.clear ();
     return;
   }
 
@@ -203,8 +204,8 @@ Feature<PointInT, PointOutT>::compute (PointCloudOut &output)
   output.header = input_->header;
 
   // Resize the output dataset
-  if (output.points.size () != indices_->size ())
-    output.points.resize (indices_->size ());
+  if (output.size () != indices_->size ())
+    output.resize (indices_->size ());
 
   // Check if the output will be computed for all points or only a subset
   // If the input width or height are not set, set output width as size

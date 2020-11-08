@@ -37,7 +37,6 @@
 
 #pragma once
 
-#include <pcl/filters/boost.h>
 #include <pcl/filters/voxel_grid.h>
 #include <map>
 #include <pcl/point_types.h>
@@ -455,12 +454,12 @@ namespace pcl
         }
 
         // Find k-nearest neighbors in the occupied voxel centroid cloud
-        std::vector<int> k_indices;
+        Indices k_indices;
         k = kdtree_.nearestKSearch (point, k, k_indices, k_sqr_distances);
 
         // Find leaves corresponding to neighbors
         k_leaves.reserve (k);
-        for (const int &k_index : k_indices)
+        for (const auto &k_index : k_indices)
         {
           auto voxel = leaves_.find(voxel_centroids_leaf_indices_[k_index]);
           if (voxel == leaves_.end()) {
@@ -514,12 +513,12 @@ namespace pcl
         }
 
         // Find neighbors within radius in the occupied voxel centroid cloud
-        std::vector<int> k_indices;
+        Indices k_indices;
         const int k = kdtree_.radiusSearch (point, radius, k_indices, k_sqr_distances, max_nn);
 
         // Find leaves corresponding to neighbors
         k_leaves.reserve (k);
-        for (const int &k_index : k_indices)
+        for (const auto &k_index : k_indices)
         {
           const auto voxel = leaves_.find(voxel_centroids_leaf_indices_[k_index]);
           if(voxel == leaves_.end()) {

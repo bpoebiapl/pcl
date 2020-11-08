@@ -41,7 +41,6 @@
 #include <iostream>
 #include <vector>
 #include <utility>
-#include <cfloat>
 
 #include <pcl/visualization/common/common.h>
 #include <pcl/point_types.h>
@@ -49,15 +48,15 @@
 #include <pcl/point_cloud.h>
 #include <pcl/common/io.h>
 
-class vtkRenderWindow;
-class vtkRenderWindowInteractor;
-class vtkContextView;
-class vtkChartXY;
-class vtkColorSeries;
-
+#include <vtkContextView.h>
+#include <vtkChartXY.h>
+#include <vtkColorSeries.h>
 #include <vtkSmartPointer.h>
 #include <vtkCommand.h>
 #include <vtkChart.h>
+
+class vtkRenderWindow;
+class vtkRenderWindowInteractor;
 
 namespace pcl
 {

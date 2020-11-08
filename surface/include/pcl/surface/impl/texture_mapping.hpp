@@ -321,7 +321,7 @@ pcl::TextureMapping<PointInT>::mapMultipleTexturesToMeshUV (pcl::TextureMesh &te
     {
       Eigen::Vector2f tmp_VT;
       // for each point of this face
-      for (const unsigned int &vertex : tex_polygon.vertices)
+      for (const auto &vertex : tex_polygon.vertices)
       {
         // get point
         PointInT pt = (*camera_transformed_cloud)[vertex];
@@ -382,7 +382,7 @@ pcl::TextureMapping<PointInT>::isPointOccluded (const PointInT &pt, OctreePtr oc
   octree->getIntersectedVoxelIndices(direction, -direction, indices);
 
   int nbocc = static_cast<int> (indices.size ());
-  for (const int &index : indices)
+  for (const auto &index : indices)
   {
    // if intersected point is on the over side of the camera
    if (pt.z * (*cloud)[index].z < 0)
@@ -435,7 +435,7 @@ pcl::TextureMapping<PointInT>::removeOccludedPoints (const PointCloudPtr &input_
     octree.getIntersectedVoxelIndices (direction, -direction, indices);
 
     int nbocc = static_cast<int> (indices.size ());
-    for (const int &index : indices)
+    for (const auto &index : indices)
     {
       // if intersected point is on the over side of the camera
       if ((*input_cloud)[i].z * (*input_cloud)[index].z < 0)
@@ -495,7 +495,7 @@ pcl::TextureMapping<PointInT>::removeOccludedPoints (const pcl::TextureMesh &tex
       std::vector<int>::iterator it;
 
       // iterate over face's vertex
-      for (const unsigned int &vertex : tex_mesh.tex_polygons[polygons][faces].vertices)
+      for (const auto &vertex : tex_mesh.tex_polygons[polygons][faces].vertices)
       {
         it = find (occluded.begin (), occluded.end (), vertex);
 
@@ -662,7 +662,7 @@ pcl::TextureMapping<PointInT>::showOcclusions (const PointCloudPtr &input_cloud,
     nbocc = static_cast<int> (indices.size ());
 
     // TODO need to clean this up and find tricks to get remove aliasaing effect on planes
-    for (const int &index : indices)
+    for (const auto &index : indices)
     {
       // if intersected point is on the over side of the camera
       if (pt.z * (*input_cloud)[index].z < 0)

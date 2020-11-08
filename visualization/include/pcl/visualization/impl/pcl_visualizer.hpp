@@ -651,7 +651,7 @@ pcl::visualization::PCLVisualizer::addText3D (
   // If there is no custom viewport and the viewport number is not 0, exit
   if (rens_->GetNumberOfItems () <= viewport)
   {
-    PCL_ERROR ("[addText3D] The viewport [%d] doesn't exist (id <%s>)! ",
+    PCL_ERROR ("[addText3D] The viewport [%d] doesn't exist (id <%s>)! \n",
                viewport,
                tid.c_str ());
     return false;
@@ -664,7 +664,7 @@ pcl::visualization::PCLVisualizer::addText3D (
     const std::string uid = tid + std::string (i, '*');
     if (contains (uid))
     {
-      PCL_ERROR ( "[addText3D] The id <%s> already exists in viewport [%d]! "
+      PCL_ERROR ( "[addText3D] The id <%s> already exists in viewport [%d]! \n"
                   "Please choose a different id and retry.\n",
                   tid.c_str (),
                   i);
@@ -738,7 +738,7 @@ pcl::visualization::PCLVisualizer::addText3D (
   // If there is no custom viewport and the viewport number is not 0, exit
   if (rens_->GetNumberOfItems () <= viewport)
   {
-    PCL_ERROR ("[addText3D] The viewport [%d] doesn't exist (id <%s>)! ",
+    PCL_ERROR ("[addText3D] The viewport [%d] doesn't exist (id <%s>)!\n",
                viewport,
                tid.c_str ());
     return false;
@@ -1701,32 +1701,9 @@ pcl::visualization::PCLVisualizer::addPolygonMesh (
   {
     // Create polys from polyMesh.polygons
     vtkSmartPointer<vtkCellArray> cell_array = vtkSmartPointer<vtkCellArray>::New ();
-    vtkIdType *cell = cell_array->WritePointer (vertices.size (), vertices.size () * (max_size_of_polygon + 1));
-    int idx = 0;
-    if (!lookup.empty ())
-    {
-      for (std::size_t i = 0; i < vertices.size (); ++i, ++idx)
-      {
-        std::size_t n_points = vertices[i].vertices.size ();
-        *cell++ = n_points;
-        //cell_array->InsertNextCell (n_points);
-        for (std::size_t j = 0; j < n_points; j++, ++idx)
-          *cell++ = lookup[vertices[i].vertices[j]];
-          //cell_array->InsertCellPoint (lookup[vertices[i].vertices[j]]);
-      }
-    }
-    else
-    {
-      for (std::size_t i = 0; i < vertices.size (); ++i, ++idx)
-      {
-        std::size_t n_points = vertices[i].vertices.size ();
-        *cell++ = n_points;
-        //cell_array->InsertNextCell (n_points);
-        for (std::size_t j = 0; j < n_points; j++, ++idx)
-          *cell++ = vertices[i].vertices[j];
-          //cell_array->InsertCellPoint (vertices[i].vertices[j]);
-      }
-    }
+    
+    const auto idx = details::fillCells(lookup,vertices,cell_array, max_size_of_polygon);
+
     vtkSmartPointer<vtkPolyData> polydata;
     allocVtkPolyData (polydata);
     cell_array->GetData ()->SetNumberOfValues (idx);
@@ -1878,28 +1855,9 @@ pcl::visualization::PCLVisualizer::updatePolygonMesh (
 
   // Update the cells
   cells = vtkSmartPointer<vtkCellArray>::New ();
-  vtkIdType *cell = cells->WritePointer (verts.size (), verts.size () * (max_size_of_polygon + 1));
-  int idx = 0;
-  if (!lookup.empty ())
-  {
-    for (std::size_t i = 0; i < verts.size (); ++i, ++idx)
-    {
-      std::size_t n_points = verts[i].vertices.size ();
-      *cell++ = n_points;
-      for (std::size_t j = 0; j < n_points; j++, cell++, ++idx)
-        *cell = lookup[verts[i].vertices[j]];
-    }
-  }
-  else
-  {
-    for (std::size_t i = 0; i < verts.size (); ++i, ++idx)
-    {
-      std::size_t n_points = verts[i].vertices.size ();
-      *cell++ = n_points;
-      for (std::size_t j = 0; j < n_points; j++, cell++, ++idx)
-        *cell = verts[i].vertices[j];
-    }
-  }
+  
+  const auto idx = details::fillCells(lookup, verts, cells, max_size_of_polygon);
+
   cells->GetData ()->SetNumberOfValues (idx);
   cells->Squeeze ();
   // Set the the vertices

@@ -35,8 +35,9 @@
  *
  */
 
+#include <ui_openni_passthrough.h>
+
 #include <pcl/apps/openni_passthrough.h>
-#include <pcl/console/parse.h>
 
 #include <QApplication>
 #include <QEvent>
@@ -44,6 +45,8 @@
 #include <QObject>
 
 #include <vtkRenderWindow.h>
+#include <vtkRendererCollection.h>
+#include <vtkGenericOpenGLRenderWindow.h>
 
 #include <thread>
 
@@ -61,13 +64,23 @@ OpenNIPassthrough::OpenNIPassthrough(pcl::OpenNIGrabber& grabber)
   ui_->setupUi(this);
 
   this->setWindowTitle("PCL OpenNI PassThrough Viewer");
+    //Create the QVTKWidget
+#if VTK_MAJOR_VERSION > 8
+  auto renderer = vtkSmartPointer<vtkRenderer>::New();
+  auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+  renderWindow->AddRenderer(renderer);
+  vis_.reset(new pcl::visualization::PCLVisualizer(renderer, renderWindow, "", false));
+  ui_->qvtk_widget->setRenderWindow(vis_->getRenderWindow());
+  vis_->setupInteractor(ui_->qvtk_widget->interactor(), ui_->qvtk_widget->renderWindow());
+#else
   vis_.reset(new pcl::visualization::PCLVisualizer("", false));
   ui_->qvtk_widget->SetRenderWindow(vis_->getRenderWindow());
-  vis_->setupInteractor(ui_->qvtk_widget->GetInteractor(),
-                        ui_->qvtk_widget->GetRenderWindow());
-  vis_->getInteractorStyle()->setKeyboardModifier(
-      pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
-  ui_->qvtk_widget->update();
+  vis_->setupInteractor(ui_->qvtk_widget->GetInteractor(), ui_->qvtk_widget->GetRenderWindow());
+#endif
+
+  vis_->getInteractorStyle()->setKeyboardModifier(pcl::visualization::INTERACTOR_KB_MOD_SHIFT);
+  
+  refreshView();
 
   // Start the OpenNI data acquision
   std::function<void(const CloudConstPtr&)> f = [this](const CloudConstPtr& cloud) {
@@ -123,6 +136,16 @@ OpenNIPassthrough::timeoutSlot()
   }
   FPS_CALC("visualization");
   ui_->qvtk_widget->update();
+}
+
+void
+OpenNIPassthrough::refreshView()
+{
+#if VTK_MAJOR_VERSION > 8
+  ui_->qvtk_widget->renderWindow()->Render();
+#else
+  ui_->qvtk_widget->update();
+#endif
 }
 
 int

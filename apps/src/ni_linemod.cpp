@@ -41,13 +41,10 @@
 #include <pcl/common/angles.h>
 #include <pcl/common/common.h>
 #include <pcl/common/time.h>
-#include <pcl/console/parse.h>
 #include <pcl/console/print.h>
 #include <pcl/features/integral_image_normal.h>
-#include <pcl/filters/extract_indices.h>
 #include <pcl/geometry/polygon_operations.h>
 #include <pcl/io/openni_grabber.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl/sample_consensus/sac_model_plane.h>
 #include <pcl/search/organized.h>
 #include <pcl/segmentation/edge_aware_plane_comparator.h>
@@ -262,7 +259,7 @@ public:
     l.label = 0;
     PointCloud<Label>::Ptr scene(new PointCloud<Label>(cloud->width, cloud->height, l));
     // Mask the objects that we want to split into clusters
-    for (const int& index : points_above_plane->indices)
+    for (const auto& index : points_above_plane->indices)
       (*scene)[index].label = 1;
     euclidean_cluster_comparator->setLabels(scene);
 

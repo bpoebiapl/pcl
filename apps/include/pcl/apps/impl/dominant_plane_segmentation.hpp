@@ -34,9 +34,7 @@
  */
 
 #include <pcl/common/time.h>
-#include <pcl/features/integral_image_normal.h>
 #include <pcl/filters/extract_indices.h> // for ExtractIndices
-#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/memory.h> // for pcl::make_shared
 
 template <typename PointType>
@@ -84,7 +82,7 @@ pcl::apps::DominantPlaneSegmentation<PointType>::compute_table_plane()
   pass_.filter(*cloud_filtered_);
 
   if (int(cloud_filtered_->size()) < k_) {
-    PCL_WARN("[DominantPlaneSegmentation] Filtering returned %lu points! Aborting.",
+    PCL_WARN("[DominantPlaneSegmentation] Filtering returned %lu points! Aborting.\n",
              cloud_filtered_->size());
     return;
   }
@@ -105,7 +103,7 @@ pcl::apps::DominantPlaneSegmentation<PointType>::compute_table_plane()
   seg_.segment(*table_inliers_, *table_coefficients_);
 
   if (table_inliers_->indices.empty()) {
-    PCL_WARN("[DominantPlaneSegmentation] No Plane Inliers points! Aborting.");
+    PCL_WARN("[DominantPlaneSegmentation] No Plane Inliers points! Aborting.\n");
     return;
   }
 
@@ -236,7 +234,7 @@ pcl::apps::DominantPlaneSegmentation<PointType>::compute_fast(
   seg_.segment(*table_inliers_, *table_coefficients_);
 
   if (table_inliers_->indices.empty()) {
-    PCL_WARN("[DominantPlaneSegmentation] No Plane Inliers points! Aborting.");
+    PCL_WARN("[DominantPlaneSegmentation] No Plane Inliers points! Aborting.\n");
     return;
   }
 
@@ -749,7 +747,7 @@ pcl::apps::DominantPlaneSegmentation<PointType>::compute_full(
   pass_.filter(*cloud_filtered_);
 
   if (int(cloud_filtered_->size()) < k_) {
-    PCL_WARN("[DominantPlaneSegmentation] Filtering returned %lu points! Aborting.",
+    PCL_WARN("[DominantPlaneSegmentation] Filtering returned %lu points! Aborting.\n",
              cloud_filtered_->size());
     return;
   }
@@ -780,7 +778,7 @@ pcl::apps::DominantPlaneSegmentation<PointType>::compute_full(
   seg_.segment(*table_inliers_, *table_coefficients_);
 
   if (table_inliers_->indices.empty()) {
-    PCL_WARN("[DominantPlaneSegmentation] No Plane Inliers points! Aborting.");
+    PCL_WARN("[DominantPlaneSegmentation] No Plane Inliers points! Aborting.\n");
     return;
   }
 
